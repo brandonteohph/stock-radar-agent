@@ -1,0 +1,17 @@
+{
+  "name": "stock-radar-agent",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "daily": "tsx run-stock-radar.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@openai/agents": "latest",
+    "openai": "latest",
+    "zod": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  } ,
+  "devDependencies": {}
+}
