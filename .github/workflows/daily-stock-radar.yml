@@ -7,6 +7,19 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+    inputs:
+      ticker:
+        description: Stock ticker to research
+        required: false
+        default: NVDA
+      company_name:
+        description: Company name to research
+        required: false
+        default: NVIDIA
+      max_links:
+        description: Maximum number of links to review
+        required: false
+        default: "5"
 
 permissions:
   contents: read
@@ -18,9 +31,9 @@ jobs:
 
     env:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      TICKER: NVDA
-      COMPANY_NAME: NVIDIA
-      MAX_LINKS: "5"
+      TICKER: ${{ inputs.ticker || 'NVDA' }}
+      COMPANY_NAME: ${{ inputs.company_name || 'NVIDIA' }}
+      MAX_LINKS: ${{ inputs.max_links || '5' }}
 
     steps:
       - name: Checkout repo
@@ -45,11 +58,12 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          ISSUE_NUMBER=$(gh issue list --state open --search "Daily Stock Radar in:title" --json number --jq '.[0].number')
+          ISSUE_TITLE="Daily Stock Radar: ${TICKER}"
+          ISSUE_NUMBER=$(gh issue list --state open --search "$ISSUE_TITLE in:title" --json number --jq '.[0].number')
 
           if [ -z "$ISSUE_NUMBER" ]; then
             gh issue create \
-              --title "Daily Stock Radar" \
+              --title "$ISSUE_TITLE" \
               --body-file stock-radar.md
           else
             gh issue comment "$ISSUE_NUMBER" \

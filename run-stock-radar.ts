@@ -203,6 +203,28 @@ const requiredEnv = (name: string): string => {
     return value;
 };
 
+const parseArgs = (args: string[]): Partial<WorkflowInput> => {
+    const parsed: Partial<WorkflowInput> = {};
+
+    for (let index = 0; index < args.length; index += 1) {
+        const arg = args[index];
+        const nextValue = args[index + 1];
+
+        if (arg === "--ticker" && nextValue) {
+            parsed.ticker = nextValue;
+            index += 1;
+        } else if (arg === "--company-name" && nextValue) {
+            parsed.company_name = nextValue;
+            index += 1;
+        } else if (arg === "--max-links" && nextValue) {
+            parsed.max_links = Number.parseInt(nextValue, 10);
+            index += 1;
+        }
+    }
+
+    return parsed;
+};
+
 const formatBriefMarkdown = (brief: Brief): string => {
     const links = brief.top_links
         .map((link, index) => `${index + 1}. [${link.title}](${link.url}) - ${link.why_it_matters}`)
@@ -233,9 +255,10 @@ ${brief.disclaimer}
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1]);
 
 if (isMain) {
-    const ticker = process.env.TICKER ?? "NVDA";
-    const companyName = process.env.COMPANY_NAME ?? "NVIDIA";
-    const maxLinks = Number.parseInt(process.env.MAX_LINKS ?? "5", 10);
+    const args = parseArgs(process.argv.slice(2));
+    const ticker = args.ticker ?? process.env.TICKER ?? "NVDA";
+    const companyName = args.company_name ?? process.env.COMPANY_NAME ?? ticker;
+    const maxLinks = args.max_links ?? Number.parseInt(process.env.MAX_LINKS ?? "5", 10);
 
     requiredEnv("OPENAI_API_KEY");
 
